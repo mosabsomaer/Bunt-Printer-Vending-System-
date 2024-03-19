@@ -85,6 +85,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                     horizontal: 30,
                   ),
                   child: PinCodeTextField(
+                    autoFocus:true,
                     appContext: context,
                     pastedTextStyle: const TextStyle(
                       color: Color.fromARGB(255, 191, 173, 105),
