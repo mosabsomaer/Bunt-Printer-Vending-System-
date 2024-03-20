@@ -5,13 +5,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:bunt_machine/helpers/consts.dart';
-class PinCodeVerificationScreen extends StatefulWidget {
-  const PinCodeVerificationScreen({
-    Key? key,
-  
-  }) : super(key: key);
 
- 
+class PinCodeVerificationScreen extends StatefulWidget {
+  final VoidCallback navigateto;
+
+  const PinCodeVerificationScreen({
+    required this.navigateto,
+    super.key,
+  });
 
   @override
   State<PinCodeVerificationScreen> createState() =>
@@ -37,8 +38,6 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
 
   @override
   void dispose() {
-    errorController!.close();
-
     super.dispose();
   }
 
@@ -64,16 +63,17 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
           child: ListView(
             children: <Widget>[
               const SizedBox(height: 38),
-             
-               Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   'Enter Order Number',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 36, color: lowlightColor),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 36,
+                      color: lowlightColor),
                   textAlign: TextAlign.center,
                 ),
               ),
-              
               const SizedBox(
                 height: 20,
               ),
@@ -85,34 +85,34 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                     horizontal: 30,
                   ),
                   child: PinCodeTextField(
-                    autoFocus:true,
+                    autoFocus: true,
                     appContext: context,
                     pastedTextStyle: const TextStyle(
                       color: Color.fromARGB(255, 191, 173, 105),
                       fontWeight: FontWeight.bold,
                     ),
                     length: 6,
-                 
+
                     animationType: AnimationType.scale,
                     validator: (v) {
-                      if (v!.length < 3) {
+                      if (v!.length < 6) {
                         return "I'm from validator";
                       } else {
                         return null;
                       }
                     },
                     pinTheme: PinTheme(
-                      shape: PinCodeFieldShape.circle,
-                      borderRadius: BorderRadius.circular(5),
-                      fieldHeight: 54,
-                      fieldWidth: 54,
-                      selectedColor:const Color.fromARGB(255, 191, 173, 105),
-                      activeColor:const Color.fromARGB(255, 191, 173, 105),
-                      activeFillColor: Colors.white,
-                      inactiveFillColor: Colors.white,
-                      selectedFillColor:Colors.white,
-                      inactiveColor:const Color.fromARGB(255, 191, 173, 105)
-                    ),
+                        shape: PinCodeFieldShape.circle,
+                        borderRadius: BorderRadius.circular(5),
+                        fieldHeight: 54,
+                        fieldWidth: 54,
+                        selectedColor: const Color.fromARGB(255, 191, 173, 105),
+                        activeColor: const Color.fromARGB(255, 191, 173, 105),
+                        activeFillColor: Colors.white,
+                        inactiveFillColor: Colors.white,
+                        selectedFillColor: Colors.white,
+                        inactiveColor:
+                            const Color.fromARGB(255, 191, 173, 105)),
                     cursorColor: Colors.black,
                     animationDuration: const Duration(milliseconds: 300),
                     enableActiveFill: true,
@@ -127,7 +127,20 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                       )
                     ],
                     onCompleted: (v) {
+                      debugPrint(v);
                       debugPrint("Completed");
+
+                      currentText = v;
+                      if (v != "123456") {
+                        errorController!.add(ErrorAnimationType.shake);
+                        setState(() => hasError = true);
+                      } else {
+                        setState(() {
+                          hasError = false;
+                          snackBar("OTP Verified!!");
+                        });
+                        widget.navigateto();
+                      }
                     },
                     // onTap: () {
                     //   print("Pressed");
@@ -161,58 +174,54 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
               const SizedBox(
                 height: 20,
               ),
-            
-             
-              Container(
-                margin:
-                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
-                child: ButtonTheme(
-                  height: 50,
-                  child: TextButton(
-                    onPressed: () {
-                      formKey.currentState!.validate();
-                      // conditions for validating
-                      if (currentText.length != 6 || currentText != "123456") {
-                        errorController!.add(ErrorAnimationType
-                            .shake); // Triggering error shake animation
-                        setState(() => hasError = true);
-                      } else {
-                        setState(
-                          () {
-                            hasError = false;
-                            snackBar("OTP Verified!!");
-                          },
-                        );
-                      }
-                    },
-                    child: Center(
-                      child: Text(
-                        "VERIFY".toUpperCase(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                decoration: BoxDecoration(
-                    color: Colors.green.shade300,
-                    borderRadius: BorderRadius.circular(5),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.green.shade200,
-                          offset: const Offset(1, -2),
-                          blurRadius: 5),
-                      BoxShadow(
-                          color: Colors.green.shade200,
-                          offset: const Offset(-1, 2),
-                          blurRadius: 5)
-                    ]),
-              ),
-             
-             
+              // Container(
+              //   margin:
+              //       const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
+              //   child: ButtonTheme(
+              //     height: 50,
+              //     child: TextButton(
+              //       onPressed: () {
+              //         formKey.currentState!.validate();
+              //         // conditions for validating
+              //         if (currentText.length != 6 || currentText != "123456") {
+              //           errorController!.add(ErrorAnimationType
+              //               .shake); // Triggering error shake animation
+              //           setState(() => hasError = true);
+              //         } else {
+              //           setState(
+              //             () {
+              //               hasError = false;
+              //               snackBar("OTP Verified!!");
+              //             },
+              //           );
+              //         }
+              //       },
+              //       child: Center(
+              //         child: Text(
+              //           "VERIFY".toUpperCase(),
+              //           style: const TextStyle(
+              //             color: Colors.white,
+              //             fontSize: 18,
+              //             fontWeight: FontWeight.bold,
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              //   decoration: BoxDecoration(
+              //       color: Colors.green.shade300,
+              //       borderRadius: BorderRadius.circular(5),
+              //       boxShadow: [
+              //         BoxShadow(
+              //             color: Colors.green.shade200,
+              //             offset: const Offset(1, -2),
+              //             blurRadius: 5),
+              //         BoxShadow(
+              //             color: Colors.green.shade200,
+              //             offset: const Offset(-1, 2),
+              //             blurRadius: 5)
+              //       ]),
+              // )
             ],
           ),
         ),

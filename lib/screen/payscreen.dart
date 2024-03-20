@@ -10,6 +10,6 @@ class PayScreen extends StatefulWidget {
 class _PayScreenState extends State<PayScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Text("data");
   }
 }

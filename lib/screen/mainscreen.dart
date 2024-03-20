@@ -1,9 +1,29 @@
+
+
 import 'package:bunt_machine/helpers/consts.dart';
+import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/widget/pincode.dart';
 import 'package:flutter/material.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+ @override
+  void movetoscreen() {
+    
+ Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PayScreen(),
+                  ),
+                );
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +81,7 @@ class MainScreen extends StatelessWidget {
                   SizedBox(
                     height: size.height,
                     width: 424,
-                    child: const PinCodeVerificationScreen(
-                        // a random number, please don't call xD
-                        ),
+                    child:  PinCodeVerificationScreen(navigateto: movetoscreen),
                   )
                 ],
               ),
