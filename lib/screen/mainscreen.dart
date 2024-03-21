@@ -1,5 +1,3 @@
-
-
 import 'package:bunt_machine/helpers/consts.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/widget/pincode.dart';
@@ -13,16 +11,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
- @override
   void movetoscreen() {
-    
- Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PayScreen(),
-                  ),
-                );
-
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const PayScreen(),
+      ),
+    );
   }
 
   @override
@@ -35,22 +30,25 @@ class _MainScreenState extends State<MainScreen> {
             flex: 1,
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/Vector.png',
-                      width: size.width * 0.1,
-                      alignment: Alignment.center,
-                    ),
-                    Text(
-                      'Bunt',
-                      style: TextStyle(
-                        fontSize: 96.0,
-                        fontWeight: FontWeight.bold,
-                        color: secondaryColor,
+                Container(
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/Vector.png',
+                        width: size.width * 0.1,
                       ),
-                    ),
-                  ],
+                      Text(
+                        'Bunt',
+                        style: TextStyle(
+                          fontSize: 96.0,
+                          fontWeight: FontWeight.bold,
+                          color: secondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 Image.asset(
                   'assets/download.png',
@@ -75,13 +73,18 @@ class _MainScreenState extends State<MainScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              color: primaryColor,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/background.png'),
+                  fit: BoxFit.fill,
+                ),
+              ),
               child: Column(
                 children: [
                   SizedBox(
                     height: size.height,
                     width: 424,
-                    child:  PinCodeVerificationScreen(navigateto: movetoscreen),
+                    child: PinCodeVerificationScreen(navigateto: movetoscreen),
                   )
                 ],
               ),
