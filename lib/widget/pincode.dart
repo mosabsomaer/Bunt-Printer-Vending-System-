@@ -1,7 +1,5 @@
-// ignore_for_file: sort_child_properties_last
 
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:bunt_machine/helpers/consts.dart';
@@ -50,17 +48,17 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
       ),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      body: GestureDetector(
-        onTap: () {},
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: primaryColor,
+    body: GestureDetector(
+     
+      child: Center(
         child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
+          width: 424,
           child: ListView(
+            shrinkWrap: true,
             children: <Widget>[
               const SizedBox(height: 38),
               Padding(
@@ -68,15 +66,14 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                 child: Text(
                   'Enter Order Number',
                   style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 36,
-                      color: lowlightColor),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 36,
+                    color: lowlightColor,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              const SizedBox(height: 20),
               Form(
                 key: formKey,
                 child: Padding(
@@ -171,9 +168,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 20,
-              ),
+              
               // Container(
               //   margin:
               //       const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
@@ -226,6 +221,6 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

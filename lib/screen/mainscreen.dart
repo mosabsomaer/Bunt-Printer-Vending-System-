@@ -76,10 +76,11 @@ class _MainScreenState extends State<MainScreen> {
               decoration: const BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/background.png'),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 ),
               ),
               child: Column(
+                
                 children: [
                   SizedBox(
                     height: size.height,
