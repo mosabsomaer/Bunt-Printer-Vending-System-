@@ -1,4 +1,5 @@
 import 'package:bunt_machine/helpers/consts.dart';
+import 'package:bunt_machine/screen/codescreen.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/widget/pincode.dart';
 import 'package:flutter/material.dart';
@@ -11,14 +12,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  void movetoscreen() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PayScreen(),
-      ),
-    );
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -79,16 +73,7 @@ class _MainScreenState extends State<MainScreen> {
                   fit: BoxFit.cover,
                 ),
               ),
-              child: Column(
-                
-                children: [
-                  SizedBox(
-                    height: size.height,
-                    width: 424,
-                    child: PinCodeVerificationScreen(navigateto: movetoscreen),
-                  )
-                ],
-              ),
+              child:  const  CodeScreen()
             ),
           ),
         ],

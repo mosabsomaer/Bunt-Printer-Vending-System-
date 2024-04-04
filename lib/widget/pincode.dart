@@ -23,16 +23,24 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
 
   // ignore: close_sinks
   StreamController<ErrorAnimationType>? errorController;
-
+FocusNode pinFocusNode = FocusNode();
   bool hasError = false;
   String currentText = "";
   final formKey = GlobalKey<FormState>();
 
   @override
-  void initState() {
-    errorController = StreamController<ErrorAnimationType>();
-    super.initState();
-  }
+void initState() {
+  errorController = StreamController<ErrorAnimationType>();
+  pinFocusNode.addListener(() {
+    if (!pinFocusNode.hasFocus) {
+      // Set the focus back to the pin code field when focus is lost
+      Future.delayed(const Duration(milliseconds: 100), () {
+        FocusScope.of(context).requestFocus(pinFocusNode);
+      });
+    }
+  });
+  super.initState();
+}
 
   @override
   void dispose() {
@@ -82,6 +90,7 @@ Widget build(BuildContext context) {
                     horizontal: 30,
                   ),
                   child: PinCodeTextField(
+                    focusNode: pinFocusNode,
                     autoFocus: true,
                     appContext: context,
                     pastedTextStyle: const TextStyle(
@@ -92,8 +101,9 @@ Widget build(BuildContext context) {
 
                     animationType: AnimationType.scale,
                     validator: (v) {
-                      if (v!.length < 6) {
+                      if (v!.length == 6) {
                         return "I'm from validator";
+                        
                       } else {
                         return null;
                       }
@@ -131,6 +141,11 @@ Widget build(BuildContext context) {
                       if (v != "123456") {
                         errorController!.add(ErrorAnimationType.shake);
                         setState(() => hasError = true);
+                        FocusScope.of(context).requestFocus(pinFocusNode);
+      //                   Future.delayed(const Duration(milliseconds: 2000), () {
+      //                     currentText="";
+      //  hasError= false;
+      // });
                       } else {
                         setState(() {
                           hasError = false;
@@ -169,54 +184,6 @@ Widget build(BuildContext context) {
                 ),
               ),
               
-              // Container(
-              //   margin:
-              //       const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30),
-              //   child: ButtonTheme(
-              //     height: 50,
-              //     child: TextButton(
-              //       onPressed: () {
-              //         formKey.currentState!.validate();
-              //         // conditions for validating
-              //         if (currentText.length != 6 || currentText != "123456") {
-              //           errorController!.add(ErrorAnimationType
-              //               .shake); // Triggering error shake animation
-              //           setState(() => hasError = true);
-              //         } else {
-              //           setState(
-              //             () {
-              //               hasError = false;
-              //               snackBar("OTP Verified!!");
-              //             },
-              //           );
-              //         }
-              //       },
-              //       child: Center(
-              //         child: Text(
-              //           "VERIFY".toUpperCase(),
-              //           style: const TextStyle(
-              //             color: Colors.white,
-              //             fontSize: 18,
-              //             fontWeight: FontWeight.bold,
-              //           ),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              //   decoration: BoxDecoration(
-              //       color: Colors.green.shade300,
-              //       borderRadius: BorderRadius.circular(5),
-              //       boxShadow: [
-              //         BoxShadow(
-              //             color: Colors.green.shade200,
-              //             offset: const Offset(1, -2),
-              //             blurRadius: 5),
-              //         BoxShadow(
-              //             color: Colors.green.shade200,
-              //             offset: const Offset(-1, 2),
-              //             blurRadius: 5)
-              //       ]),
-              // )
             ],
           ),
         ),
