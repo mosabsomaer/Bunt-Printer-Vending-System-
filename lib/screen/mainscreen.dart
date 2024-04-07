@@ -1,18 +1,23 @@
 import 'package:bunt_machine/helpers/consts.dart';
-import 'package:bunt_machine/screen/codescreen.dart';
+import 'package:bunt_machine/screen/pincode.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
-import 'package:bunt_machine/widget/pincode.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  const MainScreen({Key? key}) : super(key: key);
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
-  
+  bool showPinCodeScreen = true;
+
+  void moveToAddScreen() {
+    setState(() {
+      showPinCodeScreen = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +72,15 @@ class _MainScreenState extends State<MainScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/background.png'),
                   fit: BoxFit.cover,
                 ),
               ),
-              child:  const  CodeScreen()
+              child: showPinCodeScreen
+                  ? PinCodeVerificationScreen(navigateto: moveToAddScreen)
+                  : PayScreen(),
             ),
           ),
         ],
