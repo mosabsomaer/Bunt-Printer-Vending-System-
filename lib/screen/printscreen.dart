@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
 class PrintScreen extends StatelessWidget {
-  const PrintScreen({super.key});
+    final VoidCallback navigateto;
+  const PrintScreen({super.key, required this.navigateto});
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Text('sss');
   }
 }

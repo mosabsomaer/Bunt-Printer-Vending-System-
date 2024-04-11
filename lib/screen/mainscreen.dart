@@ -1,23 +1,69 @@
 import 'package:bunt_machine/helpers/consts.dart';
 import 'package:bunt_machine/screen/pincode.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
+import 'package:bunt_machine/screen/printscreen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
-
-class _MainScreenState extends State<MainScreen> {
-  bool showPinCodeScreen = true;
-
-  void moveToAddScreen() {
-    setState(() {
-      showPinCodeScreen = false;
-    });
+enum Screen {
+  pincode,
+  payscreen,
+  printscreen,
   }
+  
+class _MainScreenState extends State<MainScreen> {
+ Screen currentScreen = Screen.pincode;
+  late Map<Screen, Widget> screenWidgets;
+
+  @override
+  void initState() {
+    super.initState();
+
+    screenWidgets = {
+      Screen.pincode: PinCodeVerificationScreen(
+        navigateto: () {
+          moveToNextScreen(Screen.payscreen);
+          setState(() {
+            currentScreen = Screen.payscreen;
+          });
+        },
+      ),
+      Screen.payscreen: PayScreen(
+        navigateto: () {
+          moveToNextScreen(Screen.printscreen);
+          setState(() {
+            currentScreen = Screen.printscreen;
+          });
+        },
+      ),
+      Screen.printscreen: PrintScreen(
+        navigateto: () {
+          moveToNextScreen(Screen.pincode);
+          setState(() {
+            currentScreen = Screen.pincode;
+          });
+        },
+      ),
+    };
+  }
+  
+void moveToNextScreen(Screen nextScreen) {
+  setState(() {
+    currentScreen = nextScreen;
+    
+  });
+  
+}
+
+  Widget getCurrentScreenWidget() {
+    return screenWidgets[currentScreen]!;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -72,16 +118,13 @@ class _MainScreenState extends State<MainScreen> {
           Expanded(
             flex: 1,
             child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/background.png'),
-                  fit: BoxFit.cover,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage('assets/background.png'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              child: showPinCodeScreen
-                  ? PinCodeVerificationScreen(navigateto: moveToAddScreen)
-                  : PayScreen(),
-            ),
+                child: getCurrentScreenWidget()),
           ),
         ],
       ),

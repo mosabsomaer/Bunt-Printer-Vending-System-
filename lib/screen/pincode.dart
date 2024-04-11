@@ -8,7 +8,7 @@ class PinCodeVerificationScreen extends StatefulWidget {
 
   const PinCodeVerificationScreen({
     required this.navigateto,
-    super.key,
+    super.key
   });
 
   @override
@@ -159,6 +159,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                                   Future.delayed(const Duration(seconds: 1),
                                       () {
                                     widget.navigateto();
+                                    
                                   });
                                 }
                               },
