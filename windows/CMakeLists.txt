@@ -1,5 +1,7 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
+set(PDFIUM_VERSION "4929" CACHE STRING "" FORCE)
+set(PDFIUM_ARCH "x64" CACHE STRING "" FORCE)
 project(bunt_machine LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
