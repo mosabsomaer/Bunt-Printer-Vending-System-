@@ -1,5 +1,5 @@
-import 'package:bunt_machine/screen/mainscreen.dart';
-import 'package:bunt_machine/screen/test.dart';
+
+import 'package:bunt_machine/screen/trash.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -13,13 +13,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      
       theme: ThemeData(
  
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+        useMaterial3: true,            
       ),debugShowCheckedModeBanner: false,
-      home: const MainScreen()
+      home: const Tbomb()//test2('hello')
     );
   }
 }

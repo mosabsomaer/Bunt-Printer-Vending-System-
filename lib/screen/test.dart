@@ -8,9 +8,6 @@ class TestScreen extends StatelessWidget {
   const TestScreen({super.key});
 //HP LaserJet M101-M106
 //assets/logoblack.pdf
-  Future<void> mosab() async {
-
-  }
 
 Future<Uint8List> _generatePdf() async {
   final ByteData assetData = await rootBundle.load('assets/logoblack.pdf');
