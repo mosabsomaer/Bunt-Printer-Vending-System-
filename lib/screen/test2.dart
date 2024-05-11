@@ -15,9 +15,16 @@ class test2 extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text(title)),
-        body: PdfPreview(
-          build: (format) => _generatePdf(format, title),
-        ),
+        body: PdfPrintAction(dynamicLayout: true,usePrinterSettings :true)
+
+
+
+//PdfPrintAction()
+
+
+        // PdfPreview(
+        //   build: (format) => _generatePdf(format, title),
+        // ),
       ),
     );
   }
