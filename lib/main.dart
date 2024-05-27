@@ -1,5 +1,6 @@
 
-import 'package:bunt_machine/screen/test2.dart';
+import 'package:bunt_machine/screen/mainscreen.dart';
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,            
       ),debugShowCheckedModeBanner: false,
-      home: const test2("dfd")
+      home: const MainScreen()
     );
   }
 }

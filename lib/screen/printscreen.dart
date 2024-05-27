@@ -1,6 +1,6 @@
 import 'package:bunt_machine/helpers/consts.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
+
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class PrintScreen extends StatefulWidget {
@@ -32,7 +32,7 @@ class _PrintScreenState extends State<PrintScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      action? 'Downloading Documents':'Printing \n 6 papers',
+                      action? 'Downloading Documents':'Printing\n6 papers',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 36,
