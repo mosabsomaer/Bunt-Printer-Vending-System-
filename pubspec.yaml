@@ -38,7 +38,11 @@ dependencies:
   cupertino_icons: ^1.0.6
   pin_code_fields: ^8.0.1
   printing: ^5.12.0
-
+  http: ^1.2.1
+  path_provider: ^2.0.5
+  shared_preferences: ^2.0.8
+  archive: ^3.6.1
+  logger: ^2.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

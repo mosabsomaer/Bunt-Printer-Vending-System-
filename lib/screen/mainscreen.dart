@@ -2,6 +2,7 @@ import 'package:bunt_machine/helpers/consts.dart';
 import 'package:bunt_machine/screen/pincode.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/screen/printscreen.dart';
+import 'package:bunt_machine/screen/test2.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -124,7 +125,7 @@ void moveToNextScreen(Screen nextScreen) {
                     fit: BoxFit.cover,
                   ),
                 ),
-                child: getCurrentScreenWidget()),
+                child: const test2("345")),
           ),
         ],
       ),

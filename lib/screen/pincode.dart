@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:bunt_machine/helpers/consts.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:archive/archive.dart';
 
 class PinCodeVerificationScreen extends StatefulWidget {
   final VoidCallback navigateto;
 
-  const PinCodeVerificationScreen({
-    required this.navigateto,
-    super.key
-  });
+  const PinCodeVerificationScreen({required this.navigateto, super.key});
 
   @override
   State<PinCodeVerificationScreen> createState() =>
@@ -18,13 +21,13 @@ class PinCodeVerificationScreen extends StatefulWidget {
 
 class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
   TextEditingController textEditingController = TextEditingController();
-  // ..text = "123456";
-  // ignore: close_sinks
   StreamController<ErrorAnimationType>? errorController;
-
   FocusNode pinFocusNode = FocusNode();
   bool hasError = false;
+  String errortext = "";
   String currentText = "";
+  bool verifystats = false;
+
   final formKey = GlobalKey<FormState>();
 
   @override
@@ -32,7 +35,6 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
     errorController = StreamController<ErrorAnimationType>();
     pinFocusNode.addListener(() {
       if (!pinFocusNode.hasFocus) {
-        // Set the focus back to the pin code field when focus is lost
         Future.delayed(const Duration(milliseconds: 100), () {
           FocusScope.of(context).requestFocus(pinFocusNode);
         });
@@ -46,7 +48,6 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
     super.dispose();
   }
 
-  // snackBar Widget
   snackBar(String? message) {
     return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -54,6 +55,83 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
         duration: const Duration(seconds: 2),
       ),
     );
+  }
+
+  Future<File> fetchOrderData(String orderId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:8000/api/downloadfile/$orderId'),
+      );
+
+      final prefs = await SharedPreferences.getInstance();
+      if (response.statusCode == 200) {
+        final contentDispositionHeader =
+            response.headers['content-disposition'];
+        final fileName = contentDispositionHeader
+            ?.split(';')
+            .firstWhere((element) => element.trim().startsWith('filename='))
+            .substring('filename='.length)
+            .replaceAll('"', '')
+            .replaceAll('=', '');
+
+        if (fileName == null) {
+          throw Exception('Failed to get file name');
+        }
+
+        final appDir = await getApplicationDocumentsDirectory();
+        final file = File('${appDir.path}/$fileName');
+        final mosab = int.parse(response.headers['total_price']!);
+        await prefs.setString('orderId', orderId);
+        await prefs.setInt('totalPrice', mosab);
+        await file.writeAsBytes(response.bodyBytes);
+        return file;
+      } else {
+        final errorJson = jsonDecode(response.body);
+        final errorMessage = errorJson['error'];
+        errortext = errorMessage;
+        throw Exception(errorMessage);
+      }
+    } catch (e) {
+      debugPrint('Error: $e');
+      throw Exception('Failed to fetch order data');
+    }
+  }
+
+  Future<void> unzipAndStoreFile(File zipFile, String orderId) async {
+    try {
+      final bytes = zipFile.readAsBytesSync();
+      final archive = ZipDecoder().decodeBytes(bytes);
+
+      final appDir = await getApplicationDocumentsDirectory();
+      final orderDir = Directory('${appDir.path}/$orderId');
+      if (!await orderDir.exists()) {
+        await orderDir.create();
+      }
+
+      for (var file in archive) {
+        final filename = file.name;
+        final data = file.content as List<int>;
+        File('${orderDir.path}/$filename')
+          ..createSync(recursive: true)
+          ..writeAsBytesSync(data);
+      }
+
+      await zipFile.delete();
+      debugPrint('Zip file unzipped and saved to: ${orderDir.path}');
+    } catch (e) {
+      debugPrint('Error unzipping file: $e');
+      throw Exception('Failed to unzip file');
+    }
+  }
+
+  void sendOrderRequest(String orderId) async {
+    try {
+      final zipFile = await fetchOrderData(orderId);
+      await unzipAndStoreFile(zipFile, orderId);
+      verifystats = true;
+    } catch (e) {
+      debugPrint('Error: $e');
+    }
   }
 
   @override
@@ -77,7 +155,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Text(
-                            'Enter Order Number',
+                            'Enter Order Code',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 36,
@@ -107,8 +185,8 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                               animationType: AnimationType.scale,
                               validator: (v) {
                                 if (v!.length == 6) {
-                                  return "I'm from validator";
-                                } else {
+                                  sendOrderRequest(currentText);
+
                                   return null;
                                 }
                               },
@@ -141,11 +219,10 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                                 )
                               ],
                               onCompleted: (v) {
-                                debugPrint(v);
                                 debugPrint("Completed");
 
                                 currentText = v;
-                                if (v != "123456") {
+                                if (!verifystats) {
                                   errorController!
                                       .add(ErrorAnimationType.shake);
                                   setState(() => hasError = true);
@@ -159,7 +236,6 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                                   Future.delayed(const Duration(seconds: 1),
                                       () {
                                     widget.navigateto();
-                                    
                                   });
                                 }
                               },
@@ -184,11 +260,9 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 30.0),
                           child: Text(
-                            hasError
-                                ? "*Please fill up all the cells properly"
-                                : "",
+                            hasError ? errortext : "",
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.red,
                               fontSize: 12,
                               fontWeight: FontWeight.w400,
                             ),

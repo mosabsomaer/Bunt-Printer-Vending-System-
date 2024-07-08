@@ -1,6 +1,7 @@
 import 'package:bunt_machine/helpers/consts.dart';
 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PayScreen extends StatefulWidget {
     final VoidCallback navigateto;
@@ -11,12 +12,26 @@ class PayScreen extends StatefulWidget {
 }
 
 class _PayScreenState extends State<PayScreen> {
-  int price = 4;
+  late SharedPreferences _prefs;
+
+  int? price;
   int paid = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    SharedPreferences.getInstance().then((prefs) {
+      setState(() {
+        _prefs = prefs;
+        price = _prefs.getInt('totalPrice');
+        debugPrint(_prefs.getInt('totalPrice').toString());
+      });
+    });
+  }
 
   void incrementPaid() {
     setState(() {
-      if (paid < price) {
+      if (paid < price!) {
         paid += 1;
         if (paid == price) {
          widget.navigateto();
@@ -44,7 +59,7 @@ class _PayScreenState extends State<PayScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
-                        'insert $price dinar',
+                        'insert $price dinar' ,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 36,
