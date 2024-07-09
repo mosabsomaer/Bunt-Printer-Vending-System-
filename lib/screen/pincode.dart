@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:archive/archive.dart';
-
+import 'package:path/path.dart' as path;
 class PinCodeVerificationScreen extends StatefulWidget {
   final VoidCallback navigateto;
 
@@ -77,14 +77,19 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
         if (fileName == null) {
           throw Exception('Failed to get file name');
         }
+final appDir = await getApplicationDocumentsDirectory();
+final appPath = appDir.path;
+final projectDir = path.join(appPath, 'assets', 'files');
+final file = File('$projectDir/$fileName');
 
-        final appDir = await getApplicationDocumentsDirectory();
-        final file = File('${appDir.path}/$fileName');
-        final mosab = int.parse(response.headers['total_price']!);
-        await prefs.setString('orderId', orderId);
-        await prefs.setInt('totalPrice', mosab);
-        await file.writeAsBytes(response.bodyBytes);
-        return file;
+// Create the 'assets/files' directory if it doesn't exist
+await Directory(projectDir).create(recursive: true);
+
+final mosab = int.parse(response.headers['total_price']!);
+await prefs.setString('orderId', orderId);
+await prefs.setInt('totalPrice', mosab);
+await file.writeAsBytes(response.bodyBytes);
+return file;
       } else {
         final errorJson = jsonDecode(response.body);
         final errorMessage = errorJson['error'];

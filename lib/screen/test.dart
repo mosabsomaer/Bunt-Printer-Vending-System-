@@ -1,49 +1,65 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:printing/printing.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TestScreen extends StatelessWidget {
-  const TestScreen({super.key});
-//HP LaserJet M101-M106
-//assets/logoblack.pdf
+  const TestScreen({Key? key});
 
-Future<Uint8List> _generatePdf() async {
-  final ByteData assetData = await rootBundle.load('assets/logoblack.pdf');
-  
+ Future<void> printFiles(BuildContext context) async {
+    // Get the directory path
+    const directoryPath = '/Users/rodainaomaer/Library/Containers/com.example.buntMachine/Data/Documents';
 
-  final pdfImage = pw.MemoryImage(assetData.buffer.asUint8List());
-const format = PdfPageFormat.a4;
-  final pdf = pw.Document();
+    // Retrieve the order ID from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final orderId = prefs.getString('orderId');
 
-  pdf.addPage(
-    pw.Page(
-      
-      pageFormat: format,
-      build: (context) {
-        return pw.Center(
-          child: pw.Image(pdfImage),
+    // Check if the order ID is not null
+    if (orderId != null) {
+      final directory = Directory('$directoryPath/$orderId');
+
+      // Check if the directory exists
+      if (await directory.exists()) {
+        // Get all the files in the directory
+        final files = await directory.list().toList();
+
+        // Print each file
+        for (final file in files) {
+          if (file is File) {
+            await Printing.directPrintPdf(
+              printer: const Printer(url: 'HP LaserJet M101-M106'),
+              onLayout: (format) => file.readAsBytes(),
+            );
+          }
+        }
+      } else {
+        // Show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Directory not found.'),
+          ),
         );
-      },
-    ),
-  );
-
-  return pdf.save();
-}
+      }
+    } else {
+      // Show an error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Order ID not found.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pnt PDF'),
+        title: const Text('Print PDF'),
       ),
       body: Center(
         child: ElevatedButton(
-          onPressed: () {
-            Printing.layoutPdf(onLayout: (format) => _generatePdf());
-          },
-          child: const Text('Print'),
+          onPressed: () => printFiles(context),
+          child: const Text('Print All Files'),
         ),
       ),
     );
