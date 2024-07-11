@@ -2,6 +2,8 @@ import 'package:bunt_machine/helpers/consts.dart';
 import 'package:bunt_machine/screen/pincode.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/screen/printscreen.dart';
+import 'package:bunt_machine/screen/test.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 
@@ -113,7 +115,12 @@ void moveToNextScreen(Screen nextScreen) {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-              ],
+               ElevatedButton(
+              onPressed: () {
+                Navigator.push(context, CupertinoPageRoute(builder: (context)=>const TestScreen()));
+              },
+              child: const Text('Test Screen'),
+            )],
             ),
           ),
           Expanded(

@@ -1,65 +1,89 @@
-import 'dart:io';
+
+
 import 'package:flutter/material.dart';
-import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TestScreen extends StatelessWidget {
-  const TestScreen({Key? key});
+class TestScreen extends StatefulWidget {
+  const TestScreen({Key? key}) : super(key: key);
 
- Future<void> printFiles(BuildContext context) async {
-    // Get the directory path
-    const directoryPath = '/Users/rodainaomaer/Library/Containers/com.example.buntMachine/Data/Documents';
+  @override
+  _TestScreenState createState() => _TestScreenState();
+}
 
-    // Retrieve the order ID from SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final orderId = prefs.getString('orderId');
+class _TestScreenState extends State<TestScreen> {
+  Map<String, dynamic> sharedData = {};
 
-    // Check if the order ID is not null
-    if (orderId != null) {
-      final directory = Directory('$directoryPath/$orderId');
+  @override
+  void initState() {
+    super.initState();
+    fetchSharedData();
+  }
 
-      // Check if the directory exists
-      if (await directory.exists()) {
-        // Get all the files in the directory
-        final files = await directory.list().toList();
 
-        // Print each file
-        for (final file in files) {
-          if (file is File) {
-            await Printing.directPrintPdf(
-              printer: const Printer(url: 'HP LaserJet M101-M106'),
-              onLayout: (format) => file.readAsBytes(),
-            );
-          }
-        }
-      } else {
-        // Show an error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Directory not found.'),
-          ),
-        );
-      }
-    } else {
-      // Show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order ID not found.'),
-        ),
-      );
+Future<void> fetchSharedData() async {
+  final prefs = await SharedPreferences.getInstance();
+  final sharedDataString = <String, dynamic>{};
+
+  sharedDataString['totalPrice'] = prefs.getInt('totalPrice')?.toString();
+  sharedDataString['orderId'] = prefs.getString('orderId');
+  sharedDataString['filesData'] = prefs.getStringList('filesData');
+
+  setState(() {
+    sharedData = sharedDataString;
+  });
+
+  // Print the retrieved values
+  debugPrint(sharedData['totalPrice']);
+  debugPrint(sharedData['orderId']);
+
+
+  // Print the individual items in the filesData list
+  if (sharedData['filesData'] != null) {
+    final filesDataList = sharedData['filesData'] as List<String>;
+    for (final item in filesDataList) {
+      debugPrint(item);
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Print PDF'),
+        title: const Text(
+          'Crunching PlayGround \n Mess Around as you wish',
+          style: TextStyle(backgroundColor: Colors.orangeAccent),
+        ),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () => printFiles(context),
-          child: const Text('Print All Files'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: fetchSharedData,
+              child: const Text('Refresh Shared Data'),
+            ),
+            const SizedBox(height: 16),
+          if (sharedData.isNotEmpty)
+  Expanded(
+    child: ListView.builder(
+      itemCount: sharedData.length,
+      itemBuilder: (context, index) {
+        final key = sharedData.keys.elementAt(index);
+        final value = sharedData[key];
+
+        return ListTile(
+          title: Text(key),
+          subtitle: Text('$value'),
+        );
+      },
+    ),
+  )
+else
+  const Text('No shared data found in shared preferences'),
+            const SizedBox(height: 16),
+           
+          ],
         ),
       ),
     );

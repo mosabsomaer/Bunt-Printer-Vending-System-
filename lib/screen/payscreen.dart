@@ -2,9 +2,11 @@ import 'package:bunt_machine/helpers/consts.dart';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class PayScreen extends StatefulWidget {
-    final VoidCallback navigateto;
+  final VoidCallback navigateto;
   const PayScreen({super.key, required this.navigateto});
 
   @override
@@ -16,6 +18,30 @@ class _PayScreenState extends State<PayScreen> {
 
   int? price;
   int paid = 0;
+Future<void> fetchAndStoreFilesData(String orderId) async {
+  final url = 'http://127.0.0.1:8000/api/showbyorder/$orderId';
+
+  try {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+
+      final filesData = jsonData['data'];
+      final numberPages= jsonData['number_pages'];
+      // Store files data in shared preferences as a list
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('filesData', filesData.map((file) => json.encode(file)).toList().cast<String>());
+      await prefs.setInt(numberPages, numberPages);
+      debugPrint('Files data stored in shared preferences: ${response.body}');
+    } else {
+      debugPrint('Failed to fetch files data. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('Error occurred while fetching files data: $e');
+  }
+}
+
 
   @override
   void initState() {
@@ -27,6 +53,8 @@ class _PayScreenState extends State<PayScreen> {
         debugPrint(_prefs.getInt('totalPrice').toString());
       });
     });
+    fetchAndStoreFilesData('547237');
+   
   }
 
   void incrementPaid() {
@@ -34,7 +62,7 @@ class _PayScreenState extends State<PayScreen> {
       if (paid < price!) {
         paid += 1;
         if (paid == price) {
-         widget.navigateto();
+          widget.navigateto();
         }
       }
     });
@@ -59,7 +87,7 @@ class _PayScreenState extends State<PayScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
-                        'insert $price dinar' ,
+                        'insert $price dinar',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 36,

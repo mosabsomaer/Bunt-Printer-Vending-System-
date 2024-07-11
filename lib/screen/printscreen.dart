@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bunt_machine/helpers/consts.dart';
@@ -5,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:http/http.dart' as http;
 class PrintScreen extends StatefulWidget {
   final VoidCallback navigateto;
 
@@ -17,10 +18,35 @@ class PrintScreen extends StatefulWidget {
 
 class _PrintScreenState extends State<PrintScreen> {
   bool action = true;
+Future<void> fetchAndStoreFilesData(String orderId) async {
+  final url = 'http://127.0.0.1:8000/api/orders/$orderId';
 
- Future<void> printFiles(BuildContext context) async {
+  try {
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+
+      final filesData = jsonData['data'];
+
+      // Store files data in shared preferences as a list
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('filesData', filesData.map((file) => json.encode(file)).toList().cast<String>());
+
+      debugPrint('Files data stored in shared preferences: ${response.body}');
+    } else {
+      debugPrint('Failed to fetch files data. Status code: ${response.statusCode}');
+    }
+  } catch (e) {
+    debugPrint('Error occurred while fetching files data: $e');
+  }
+}
+
+
+  Future<void> printFiles(BuildContext context) async {
     // Get the directory path
-    const directoryPath = '/Users/rodainaomaer/Library/Containers/com.example.buntMachine/Data/Documents';
+    const directoryPath =
+        '/Users/rodainaomaer/Library/Containers/com.example.buntMachine/Data/Documents';
 
     // Retrieve the order ID from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
@@ -38,17 +64,22 @@ class _PrintScreenState extends State<PrintScreen> {
         // Print each file
         for (final file in files) {
           if (file is File) {
+            debugPrint(file.toString());
             await Printing.directPrintPdf(
               printer: const Printer(url: 'HP LaserJet M101-M106'),
               onLayout: (format) => file.readAsBytes(),
             );
           }
         }
+        setState(() {
+          action = !action; // Toggle the value of 'action'
+        });
+        // widget.navigateto();
       } else {
         // Show an error message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Directory not found.'),
+            content: Text('Files not found.'),
           ),
         );
       }
@@ -62,13 +93,16 @@ class _PrintScreenState extends State<PrintScreen> {
     }
   }
 
+  Future<void> printPrintingInfo() async {
+    final printingInfo = await Printing.info();
+    print(printingInfo);
+  }
 
   @override
   void initState() {
     super.initState();
     printFiles(context);
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +121,7 @@ class _PrintScreenState extends State<PrintScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      action? 'Downloading Documents':'Printing\n6 papers',
+                      action ? 'Downloading Documents' : 'Printing\n6 papers',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 36,
@@ -129,11 +163,9 @@ class _PrintScreenState extends State<PrintScreen> {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        setState(() {
-                          action = !action; // Toggle the value of 'action'
-                        });
+                        printPrintingInfo();
                       },
-                      child: const SizedBox(height: 12),
+                      child: Text("data"),
                     ),
                   ],
                 ),
