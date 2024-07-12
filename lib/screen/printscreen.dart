@@ -1,47 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:bunt_machine/helpers/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
+
 class PrintScreen extends StatefulWidget {
   final VoidCallback navigateto;
-
-  const PrintScreen({super.key, required this.navigateto});
+  final VoidCallback exit;
+  const PrintScreen({super.key, required this.navigateto, required this.exit});
 
   @override
   State<PrintScreen> createState() => _PrintScreenState();
 }
 
 class _PrintScreenState extends State<PrintScreen> {
+  Map<String, dynamic> sharedData = {};
+  Map<String, dynamic> sharedDataString = {};
+  List<Map<String, dynamic>> filesDataList = [];
   bool action = true;
-Future<void> fetchAndStoreFilesData(String orderId) async {
-  final url = 'http://127.0.0.1:8000/api/orders/$orderId';
-
-  try {
-    final response = await http.get(Uri.parse(url));
-
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-
-      final filesData = jsonData['data'];
-
-      // Store files data in shared preferences as a list
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setStringList('filesData', filesData.map((file) => json.encode(file)).toList().cast<String>());
-
-      debugPrint('Files data stored in shared preferences: ${response.body}');
-    } else {
-      debugPrint('Failed to fetch files data. Status code: ${response.statusCode}');
-    }
-  } catch (e) {
-    debugPrint('Error occurred while fetching files data: $e');
-  }
-}
-
+  int? s;
 
   Future<void> printFiles(BuildContext context) async {
     // Get the directory path
@@ -51,6 +30,23 @@ Future<void> fetchAndStoreFilesData(String orderId) async {
     // Retrieve the order ID from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     final orderId = prefs.getString('orderId');
+    s = prefs.getInt('numberPages');
+
+    Map<String, dynamic> sharedDataString = {};
+    List<Map<String, dynamic>> filesDataList = [];
+
+    sharedDataString['filesData'] = prefs.getStringList('filesData');
+    if (sharedDataString['filesData'] != null) {
+      // Combine the list of JSON strings into a single JSON array string
+      final jsonArrayString = '[${sharedDataString['filesData']!.join(',')}]';
+      final jsonData = json.decode(jsonArrayString);
+      filesDataList = List<Map<String, dynamic>>.from(jsonData);
+
+      // Print the individual items in the filesData list
+      for (final item in filesDataList) {
+        debugPrint(item.toString());
+      }
+    }
 
     // Check if the order ID is not null
     if (orderId != null) {
@@ -61,20 +57,37 @@ Future<void> fetchAndStoreFilesData(String orderId) async {
         // Get all the files in the directory
         final files = await directory.list().toList();
 
-        // Print each file
-        for (final file in files) {
-          if (file is File) {
-            debugPrint(file.toString());
-            await Printing.directPrintPdf(
-              printer: const Printer(url: 'HP LaserJet M101-M106'),
-              onLayout: (format) => file.readAsBytes(),
-            );
+        // Loop through the filesDataList
+        for (final fileData in filesDataList) {
+          final fileName = fileData['file_name'];
+          final copies = fileData['copies'];
+
+          // Find the matching file in the directory
+          for (final file in files) {
+            if (file is File && file.uri.pathSegments.last == fileName) {
+              // Print the file multiple times based on the number of copies
+              for (int i = 0; i < copies; i++) {
+                await Printing.directPrintPdf(
+                  printer: const Printer(url: 'HP LaserJet M101-M106'),
+                  onLayout: (format) => file.readAsBytes(),
+                );
+              }
+
+              debugPrint(
+                  'File: $fileName, Copies: $copies, ColorMode: ${fileData['color_mode']}');
+              break; // Exit the loop once the file is printed
+            }
           }
         }
+   
+        
         setState(() {
           action = !action; // Toggle the value of 'action'
         });
-        // widget.navigateto();
+        Future.delayed(const Duration(seconds: 8), () {
+          widget.navigateto();
+        });
+
       } else {
         // Show an error message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -83,6 +96,11 @@ Future<void> fetchAndStoreFilesData(String orderId) async {
           ),
         );
       }
+      Future.delayed(const Duration(minutes: 2), () {
+
+          directory.delete(recursive: true);
+        });
+      
     } else {
       // Show an error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -93,9 +111,16 @@ Future<void> fetchAndStoreFilesData(String orderId) async {
     }
   }
 
-  Future<void> printPrintingInfo() async {
-    final printingInfo = await Printing.info();
-    print(printingInfo);
+  void getFileDetails(String fileName) {
+    for (final fileData in filesDataList) {
+      if (fileData['file_name'] == fileName) {
+        final copies = fileData['copies'];
+        final colorMode = fileData['color_mode'];
+        debugPrint('File: $fileName, Copies: $copies, ColorMode: $colorMode');
+        return;
+      }
+    }
+    debugPrint('File not found: $fileName');
   }
 
   @override
@@ -121,7 +146,9 @@ Future<void> fetchAndStoreFilesData(String orderId) async {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      action ? 'Downloading Documents' : 'Printing\n6 papers',
+                      action
+                          ? 'Downloading Documents'
+                          : 'Printing \n $s papers',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 36,
@@ -163,9 +190,9 @@ Future<void> fetchAndStoreFilesData(String orderId) async {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        printPrintingInfo();
+                        getFileDetails('1720435365-lecture 4.pdf');
                       },
-                      child: Text("data"),
+                      child: const Text("nothing"),
                     ),
                   ],
                 ),

@@ -1,7 +1,11 @@
-
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:typed_data';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'dart:io';
 
 class TestScreen extends StatefulWidget {
   const TestScreen({Key? key}) : super(key: key);
@@ -12,12 +16,56 @@ class TestScreen extends StatefulWidget {
 
 class _TestScreenState extends State<TestScreen> {
   Map<String, dynamic> sharedData = {};
-
+  Map<String, dynamic> sharedDataString = {};
+  List<Map<String, dynamic>> filesDataList = [];
   @override
   void initState() {
     super.initState();
     fetchSharedData();
+    _loadSharedPrefs();
   }
+
+
+
+  Future<void> _loadSharedPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    sharedDataString['filesData'] = prefs.getStringList('filesData');
+
+    if (sharedDataString['filesData'] != null) {
+      // Combine the list of JSON strings into a single JSON array string
+      final jsonArrayString = '[${sharedDataString['filesData']!.join(',')}]';
+      final jsonData = json.decode(jsonArrayString);
+      filesDataList = List<Map<String, dynamic>>.from(jsonData);
+
+      // Print the individual items in the filesData list
+      for (final item in filesDataList) {
+        debugPrint(item.toString());
+      }
+    }
+
+    setState(() {
+      sharedData = sharedDataString;
+    });
+
+    // Print the retrieved values
+  }
+ void getFileDetails(String fileName) {
+    for (final fileData in filesDataList) {
+      if (fileData['file_name'] == fileName) {
+        final pageCount = fileData['PageCount'];
+        final colorMode = fileData['color_mode'];
+        debugPrint('File: $fileName, PageCount: $pageCount, ColorMode: $colorMode');
+        return;
+      }
+    }
+    debugPrint('File not found: $fileName');
+  }
+
+
+
+
+
+  
 
 
 Future<void> fetchSharedData() async {
@@ -27,6 +75,7 @@ Future<void> fetchSharedData() async {
   sharedDataString['totalPrice'] = prefs.getInt('totalPrice')?.toString();
   sharedDataString['orderId'] = prefs.getString('orderId');
   sharedDataString['filesData'] = prefs.getStringList('filesData');
+  sharedDataString['numberPages'] = prefs.getInt('numberPages');
 
   setState(() {
     sharedData = sharedDataString;
@@ -83,7 +132,18 @@ else
   const Text('No shared data found in shared preferences'),
             const SizedBox(height: 16),
            
-          ],
+                      ElevatedButton(
+              onPressed: () => getFileDetails('1720272183-watch.pdf'),
+              child: Text('Get Details for 1720272183-watch.pdf'),
+            ),
+            ElevatedButton(
+              onPressed: () => getFileDetails('1720435135-Postman_Request_Example.pdf'),
+              child: Text('Get Details for 1720435135-Postman_Request_Example.pdf'),
+            ),
+            ElevatedButton(
+              onPressed: () => getFileDetails('1720435365-lecture 4.pdf'),
+              child: Text('Get Details for 1720435365-lecture 4.pdf'),
+            ),],
         ),
       ),
     );
