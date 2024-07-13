@@ -4,8 +4,6 @@ import 'package:bunt_machine/helpers/consts.dart';
 import 'package:bunt_machine/screen/pincode.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/screen/printscreen.dart';
-import 'package:bunt_machine/screen/test.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {

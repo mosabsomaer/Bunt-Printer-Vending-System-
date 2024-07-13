@@ -2,13 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:typed_data';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'dart:io';
+
 
 class TestScreen extends StatefulWidget {
-  const TestScreen({Key? key}) : super(key: key);
+  const TestScreen({super.key});
 
   @override
   _TestScreenState createState() => _TestScreenState();
@@ -134,15 +131,15 @@ else
            
                       ElevatedButton(
               onPressed: () => getFileDetails('1720272183-watch.pdf'),
-              child: Text('Get Details for 1720272183-watch.pdf'),
+              child: const Text('Get Details for 1720272183-watch.pdf'),
             ),
             ElevatedButton(
               onPressed: () => getFileDetails('1720435135-Postman_Request_Example.pdf'),
-              child: Text('Get Details for 1720435135-Postman_Request_Example.pdf'),
+              child: const Text('Get Details for 1720435135-Postman_Request_Example.pdf'),
             ),
             ElevatedButton(
               onPressed: () => getFileDetails('1720435365-lecture 4.pdf'),
-              child: Text('Get Details for 1720435365-lecture 4.pdf'),
+              child: const Text('Get Details for 1720435365-lecture 4.pdf'),
             ),],
         ),
       ),
