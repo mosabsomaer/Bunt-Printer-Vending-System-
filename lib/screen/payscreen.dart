@@ -19,7 +19,7 @@ class PayScreen extends StatefulWidget {
 class _PayScreenState extends State<PayScreen> {
   late SharedPreferences _prefs;
 
-  int? price;
+  double? price;
   int paid = 0;
     Timer? _timer;
 Future<void> fetchAndStoreFilesData() async {
@@ -55,7 +55,7 @@ Future<void> fetchAndStoreFilesData() async {
     SharedPreferences.getInstance().then((prefs) {
       setState(() {
         _prefs = prefs;
-        price = _prefs.getInt('totalPrice');
+        price = _prefs.getDouble('totalPrice');
        
       });
     });
@@ -68,7 +68,7 @@ Future<void> fetchAndStoreFilesData() async {
     setState(() {
       if (paid < price!) {
         paid += 1;
-        if (paid == price) {
+        if (paid >= price!) {
           widget.navigateto();
         
         }

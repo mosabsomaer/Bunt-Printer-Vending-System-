@@ -188,12 +188,7 @@ class _PrintScreenState extends State<PrintScreen> {
                               ],
                             ),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        getFileDetails('1720435365-lecture 4.pdf');
-                      },
-                      child: const Text("nothing"),
-                    ),
+                   
                   ],
                 ),
               ),
