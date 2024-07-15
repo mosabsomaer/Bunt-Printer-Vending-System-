@@ -25,10 +25,12 @@ class _PayScreenState extends State<PayScreen> {
 Future<void> fetchAndStoreFilesData() async {
     final prefs = await SharedPreferences.getInstance();
    final orderId =prefs.getString('orderId');
-  final url = 'http://127.0.0.1:8000/api/showbyorder/$orderId';
+  final url = '$baseUrl/api/showbyorder/$orderId';
 
   try {
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url),headers: {
+        'Authorization':'My9cdqbK0TPmdUkb2UpUK79Tkxr1Jf2RUluqjwWDT4jKt8uoxqplwCQ37SlUWNxHwORuZ9qQY1M4Ns5bHNXDNfCBK0D1TLJPbZj9dZ8dV7WJtIF2QApYWaIdO7vBzC8qhLccDkVaCK2ZCMtFAx5MtU6pmybQ8TnsBU5DpQzeah671360isoV5NccxaQz4szqDm1tOIpzV9dp1R58eKInWtuG7HTlebeqvTOhxNKOadTIXNmPw5jt775A5EYVfMXl5shdKAv9ipv3qRPPkI9c60JnoT1kscjpVkzdfzurMRKkHiJD013kOCjryatuylqgoo0vMozHN739rM6fKEcp4BIB06xkplL4ThO9tE4mlVNQZuhZWljyze1lyjKuscuYucmVhZCIsInByZXNldC53cml0ZSJdfQ.cGVM4LCJpYXQiOjE3MjAyMDIwOTIuOTcETdbGkhO0qj',
+      });
 
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);

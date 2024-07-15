@@ -60,7 +60,7 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
   Future<File> fetchOrderData(String orderId) async {
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/downloadfile/$orderId'),headers: {
+        Uri.parse('$baseUrl/api/downloadfile/$orderId'),headers: {
         'Authorization':'My9cdqbK0TPmdUkb2UpUK79Tkxr1Jf2RUluqjwWDT4jKt8uoxqplwCQ37SlUWNxHwORuZ9qQY1M4Ns5bHNXDNfCBK0D1TLJPbZj9dZ8dV7WJtIF2QApYWaIdO7vBzC8qhLccDkVaCK2ZCMtFAx5MtU6pmybQ8TnsBU5DpQzeah671360isoV5NccxaQz4szqDm1tOIpzV9dp1R58eKInWtuG7HTlebeqvTOhxNKOadTIXNmPw5jt775A5EYVfMXl5shdKAv9ipv3qRPPkI9c60JnoT1kscjpVkzdfzurMRKkHiJD013kOCjryatuylqgoo0vMozHN739rM6fKEcp4BIB06xkplL4ThO9tE4mlVNQZuhZWljyze1lyjKuscuYucmVhZCIsInByZXNldC53cml0ZSJdfQ.cGVM4LCJpYXQiOjE3MjAyMDIwOTIuOTcETdbGkhO0qj',
       } 
       );
