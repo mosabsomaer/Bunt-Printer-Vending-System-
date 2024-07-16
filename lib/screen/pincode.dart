@@ -101,8 +101,7 @@ return file;
         throw Exception(errorMessage);
       }
     } catch (e) {
-      debugPrint('Error: $e');
-      throw Exception('Failed to fetch order data');
+      throw Exception('$e');
     }
   }
 
@@ -241,7 +240,7 @@ return file;
                                 } else {
                                   setState(() {
                                     hasError = false;
-                                    snackBar("OTP Verified!!");
+                                    snackBar("Code Verified");
                                   });
                                   Future.delayed(const Duration(seconds: 1),
                                       () {
