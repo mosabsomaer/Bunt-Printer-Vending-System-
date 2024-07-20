@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class PrintScreen extends StatefulWidget {
   final VoidCallback navigateto;
@@ -79,15 +80,23 @@ class _PrintScreenState extends State<PrintScreen> {
             }
           }
         }
-   
-        
+        directory.delete(recursive: true);
+        try {
+          final response = await http.put(
+            Uri.parse('$baseUrl/api/orders/$orderId'),
+            body: {"status": "Completed"},
+          );
+          print(response.body);
+        } catch (e) {
+          throw Exception('Failed to update order');
+        }
+
         setState(() {
           action = !action; // Toggle the value of 'action'
         });
         Future.delayed(const Duration(seconds: 8), () {
           widget.navigateto();
         });
-
       } else {
         // Show an error message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,11 +105,6 @@ class _PrintScreenState extends State<PrintScreen> {
           ),
         );
       }
-      Future.delayed(const Duration(minutes: 2), () {
-
-          directory.delete(recursive: true);
-        });
-      
     } else {
       // Show an error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -188,7 +192,6 @@ class _PrintScreenState extends State<PrintScreen> {
                               ],
                             ),
                     ),
-                   
                   ],
                 ),
               ),

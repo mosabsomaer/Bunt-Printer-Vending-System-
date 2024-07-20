@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:archive/archive.dart';
 import 'package:path/path.dart' as path;
+
 class PinCodeVerificationScreen extends StatefulWidget {
   final VoidCallback navigateto;
 
@@ -59,16 +60,15 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
 
   Future<File> fetchOrderData(String orderId) async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/downloadfile/$orderId'),headers: {
-        'Authorization':'My9cdqbK0TPmdUkb2UpUK79Tkxr1Jf2RUluqjwWDT4jKt8uoxqplwCQ37SlUWNxHwORuZ9qQY1M4Ns5bHNXDNfCBK0D1TLJPbZj9dZ8dV7WJtIF2QApYWaIdO7vBzC8qhLccDkVaCK2ZCMtFAx5MtU6pmybQ8TnsBU5DpQzeah671360isoV5NccxaQz4szqDm1tOIpzV9dp1R58eKInWtuG7HTlebeqvTOhxNKOadTIXNmPw5jt775A5EYVfMXl5shdKAv9ipv3qRPPkI9c60JnoT1kscjpVkzdfzurMRKkHiJD013kOCjryatuylqgoo0vMozHN739rM6fKEcp4BIB06xkplL4ThO9tE4mlVNQZuhZWljyze1lyjKuscuYucmVhZCIsInByZXNldC53cml0ZSJdfQ.cGVM4LCJpYXQiOjE3MjAyMDIwOTIuOTcETdbGkhO0qj',
-      } 
-      );
+      final response = await http
+          .get(Uri.parse('$baseUrl/api/downloadfile/$orderId'), headers: {
+        'Authorization':
+            'My9cdqbK0TPmdUkb2UpUK79Tkxr1Jf2RUluqjwWDT4jKt8uoxqplwCQ37SlUWNxHwORuZ9qQY1M4Ns5bHNXDNfCBK0D1TLJPbZj9dZ8dV7WJtIF2QApYWaIdO7vBzC8qhLccDkVaCK2ZCMtFAx5MtU6pmybQ8TnsBU5DpQzeah671360isoV5NccxaQz4szqDm1tOIpzV9dp1R58eKInWtuG7HTlebeqvTOhxNKOadTIXNmPw5jt775A5EYVfMXl5shdKAv9ipv3qRPPkI9c60JnoT1kscjpVkzdfzurMRKkHiJD013kOCjryatuylqgoo0vMozHN739rM6fKEcp4BIB06xkplL4ThO9tE4mlVNQZuhZWljyze1lyjKuscuYucmVhZCIsInByZXNldC53cml0ZSJdfQ.cGVM4LCJpYXQiOjE3MjAyMDIwOTIuOTcETdbGkhO0qj',
+      });
 
       final prefs = await SharedPreferences.getInstance();
-      
+
       if (response.statusCode == 200) {
-        
         final contentDispositionHeader =
             response.headers['content-disposition'];
         final fileName = contentDispositionHeader
@@ -81,23 +81,31 @@ class _PinCodeVerificationScreenState extends State<PinCodeVerificationScreen> {
         if (fileName == null) {
           throw Exception('Failed to get file name');
         }
-final appDir = await getApplicationDocumentsDirectory();
-final appPath = appDir.path;
-final projectDir = path.join(appPath);
-final file = File('$projectDir/$fileName');
+        final appDir = await getApplicationDocumentsDirectory();
+        final appPath = appDir.path;
+        final projectDir = path.join(appPath);
+        final file = File('$projectDir/$fileName');
 
-await Directory(projectDir).create(recursive: true);
+        await Directory(projectDir).create(recursive: true);
 
-final mosab = double.parse(response.headers['total_price']!);
-await prefs.setString('orderId', orderId);
-await prefs.setDouble('totalPrice', mosab);
-await file.writeAsBytes(response.bodyBytes);
-
-return file;
+        final mosab = double.parse(response.headers['total_price']!);
+        await prefs.setString('orderId', orderId);
+        await prefs.setDouble('totalPrice', mosab);
+        await file.writeAsBytes(response.bodyBytes);
+        verifystats = true;
+        return file;
       } else {
+        
         final errorJson = jsonDecode(response.body);
         final errorMessage = errorJson['error'];
-        errortext = errorMessage;
+        
+        setState(() { 
+          errorController!.add(ErrorAnimationType.shake);
+          verifystats = false;
+          hasError=true;
+          errortext = errorMessage;
+
+        });
         throw Exception(errorMessage);
       }
     } catch (e) {
@@ -132,11 +140,27 @@ return file;
     }
   }
 
+
+
+
+
   void sendOrderRequest(String orderId) async {
     try {
       final zipFile = await fetchOrderData(orderId);
       await unzipAndStoreFile(zipFile, orderId);
-      verifystats = true;
+
+      if (!verifystats) {
+        setState(() => hasError = true);
+        FocusScope.of(context).requestFocus(pinFocusNode);
+      } else {
+        setState(() {
+          hasError = false;
+          snackBar("Code Verified");
+        });
+        Future.delayed(const Duration(seconds: 1), () {
+          widget.navigateto();
+        });
+      }
     } catch (e) {
       debugPrint('Error: $e');
     }
@@ -193,8 +217,6 @@ return file;
                               animationType: AnimationType.scale,
                               validator: (v) {
                                 if (v!.length == 6) {
-                                  sendOrderRequest(currentText);
-
                                   return null;
                                 }
                               },
@@ -218,7 +240,7 @@ return file;
                               enableActiveFill: true,
                               errorAnimationController: errorController,
                               controller: textEditingController,
-                              keyboardType:TextInputType.number ,
+                              keyboardType: TextInputType.number,
                               boxShadows: const [
                                 BoxShadow(
                                   offset: Offset(0, 1),
@@ -229,36 +251,18 @@ return file;
                               onCompleted: (v) {
                                 debugPrint(v);
                                 debugPrint("Completed");
-
+                                sendOrderRequest(currentText);
                                 currentText = v;
-                                if (!verifystats) {
-                                  errorController!
-                                      .add(ErrorAnimationType.shake);
-                                  setState(() => hasError = true);
-                                  FocusScope.of(context)
-                                      .requestFocus(pinFocusNode);
-                                } else {
-                                  setState(() {
-                                    hasError = false;
-                                    snackBar("Code Verified");
-                                  });
-                                  Future.delayed(const Duration(seconds: 1),
-                                      () {
-                                    widget.navigateto();
-                                  });
-                                }
                               },
                               // onTap: () {
                               //   print("Pressed");
                               // },
                               onChanged: (value) {
-                                
                                 setState(() {
                                   currentText = value;
                                 });
                               },
                               beforeTextPaste: (text) {
-                               
                                 //if you return true then it will show the paste confirmation dialog. Otherwise if false, then nothing will happen.
                                 //but you can show anything you want here, like your pop up saying wrong paste format or etc
                                 return true;
