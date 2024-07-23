@@ -5,6 +5,9 @@ import 'package:bunt_machine/screen/pincode.dart';
 import 'package:bunt_machine/screen/payscreen.dart';
 import 'package:bunt_machine/screen/printscreen.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -39,7 +42,7 @@ Future<void> deleteAllContents() async {
           await entity.delete(recursive: true);
         }
       }
-      debugPrint('All contents deleted');
+      debugPrint('All order files deleted');
     } catch (e) {
       debugPrint('Error deleting contents: $e');
     }
@@ -49,10 +52,30 @@ Future<void> deleteAllContents() async {
 }
 
 
+
+void sendMachineStatusUpdate() {
+  const machineId = 2;
+  final updateUrl = '$baseUrl/api/machines/$machineId';
+
+  Timer.periodic(const Duration(minutes: 1), (timer) async {
+    try {
+      final response = await http.put(
+        Uri.parse(updateUrl),
+       body: {"status": "Active"},
+      );
+      debugPrint('ping to backend: ${response.body}');
+    } catch (e) {
+      debugPrint('Failed to update machine status: $e');
+    }
+  });
+}
+
+
+
   @override
   void initState()  {
     super.initState();
-
+sendMachineStatusUpdate();
      deleteAllContents();
 
     screenWidgets = {
