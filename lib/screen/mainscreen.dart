@@ -12,111 +12,96 @@ import 'dart:convert';
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
-
-
-
-
   @override
   State<MainScreen> createState() => _MainScreenState();
 }
+
 enum Screen {
   pincode,
   payscreen,
   printscreen,
-  }
-  
+}
+
 class _MainScreenState extends State<MainScreen> {
- Screen currentScreen = Screen.pincode;
+  Screen currentScreen = Screen.pincode;
   late Map<Screen, Widget> screenWidgets;
 
-Future<void> deleteAllContents() async {
-  final directory = Directory('/Users/rodainaomaer/Library/Containers/com.example.buntMachine/Data/Documents');
+  Future<void> deleteAllContents() async {
+    final directory = Directory(
+        '/Users/rodainaomaer/Library/Containers/com.example.buntMachine/Data/Documents');
 
-  if (await directory.exists()) {
-    try {
-      final List<FileSystemEntity> entities = directory.listSync();
-      for (FileSystemEntity entity in entities) {
-        if (entity is File) {
-          await entity.delete();
-        } else if (entity is Directory) {
-          await entity.delete(recursive: true);
+    if (await directory.exists()) {
+      try {
+        final List<FileSystemEntity> entities = directory.listSync();
+        for (FileSystemEntity entity in entities) {
+          if (entity is File) {
+            await entity.delete();
+          } else if (entity is Directory) {
+            await entity.delete(recursive: true);
+          }
         }
+        debugPrint('All order files deleted');
+      } catch (e) {
+        debugPrint('Error deleting contents: $e');
       }
-      debugPrint('All order files deleted');
-    } catch (e) {
-      debugPrint('Error deleting contents: $e');
+    } else {
+      debugPrint('Directory does not exist');
     }
-  } else {
-    debugPrint('Directory does not exist');
   }
-}
 
+  void sendMachineStatusUpdate() {
+    const machineId = 2;
+    final updateUrl = '$baseUrl/api/machines/$machineId';
 
-
-void sendMachineStatusUpdate() {
-  const machineId = 2;
-  final updateUrl = '$baseUrl/api/machines/$machineId';
-
-  Timer.periodic(const Duration(minutes: 1), (timer) async {
-    try {
-      final response = await http.put(
-        Uri.parse(updateUrl),
-       body: {"status": "Active"},
-      );
-      debugPrint('ping to backend: ${response.body}');
-    } catch (e) {
-      debugPrint('Failed to update machine status: $e');
-    }
-  });
-}
-
-
+    Timer.periodic(const Duration(minutes: 1), (timer) async {
+      try {
+        final response = await http.put(
+          Uri.parse(updateUrl),
+          body: {"status": "Active"},
+        );
+        debugPrint('ping to backend: ${response.body}');
+      } catch (e) {
+        debugPrint('Failed to update machine status: $e');
+      }
+    });
+  }
 
   @override
-  void initState()  {
+  void initState() {
     super.initState();
-sendMachineStatusUpdate();
-     deleteAllContents();
+    sendMachineStatusUpdate();
+    deleteAllContents();
 
     screenWidgets = {
-      Screen.pincode: PinCodeVerificationScreen(
-        navigateto: () {
-          setState(() {
-            currentScreen = Screen.payscreen;
-          });
-        }
-      ),
-      Screen.payscreen: PayScreen(
-        navigateto: () {
-          setState(() {
-            currentScreen = Screen.printscreen;
-          });
-        },exit:(){
-           setState(() {
-            currentScreen = Screen.pincode;
-          });
-        }
-      ),
-      Screen.printscreen: PrintScreen(
-        navigateto: () {
-          setState(() {
-            currentScreen = Screen.pincode;
-          });
-        },exit:(){
-           setState(() {
-            currentScreen = Screen.pincode;
-          });
-        }
-      ),
+      Screen.pincode: PinCodeVerificationScreen(navigateto: () {
+        setState(() {
+          currentScreen = Screen.payscreen;
+        });
+      }),
+      Screen.payscreen: PayScreen(navigateto: () {
+        setState(() {
+          currentScreen = Screen.printscreen;
+        });
+      }, exit: () {
+        setState(() {
+          currentScreen = Screen.pincode;
+        });
+      }),
+      Screen.printscreen: PrintScreen(navigateto: () {
+        setState(() {
+          currentScreen = Screen.pincode;
+        });
+      }, exit: () {
+        setState(() {
+          currentScreen = Screen.pincode;
+        });
+      }),
     };
   }
-  
-
 
   Widget getCurrentScreenWidget() {
     return screenWidgets[currentScreen]!;
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +150,7 @@ sendMachineStatusUpdate();
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-               ],
+              ],
             ),
           ),
           Expanded(
@@ -177,11 +162,10 @@ sendMachineStatusUpdate();
                     fit: BoxFit.cover,
                   ),
                 ),
-                child:  getCurrentScreenWidget()),
+                child: getCurrentScreenWidget()),
           ),
         ],
       ),
     );
   }
 }
-//getCurrentScreenWidget()
